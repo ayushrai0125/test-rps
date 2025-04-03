@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rock Paper Scissors</title>
+  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+
+<body>
+  <container>
+    <span><h2 id = "player1Score"></h2></span><span><h2 id = "player2Score"></h2></span>
+    <br>
+    <div>
+      <button id = "r" class="nope">Rock</button>
+      <button id = "p" class="nope">Paper</button>
+      <button id = "s" class="nope">Scissors</button>
+    </div><br><span>You chose: </span><span id = "player"></span>
+    <br>
+    <br>
+    <br>
+    <div>
+      <span>Other Person chose: </span><span id = "other"></span>
+      <div>
+        <h1>Result: </h1>
+        <h1 id = "result"></h1>
+      </div>
+    </div>
+    <br>
+    <br>
+    <button id = "ready">Ready!!</button>
+  </container>
+</body>
+<script src="main.js"></script>
+</html>
