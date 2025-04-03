@@ -25,16 +25,7 @@ let players = {};  // Store connected players
 let playerCount = 0;  // Track number of players
 
 // 🎮 Assign Player 1 or Player 2
-const assignPlayerRole = (session) => {
-    if (!players["player1"]) {
-        players["player1"] = session.id;
-        return "player1";
-    } else if (!players["player2"]) {
-        players["player2"] = session.id;
-        return "player2";
-    }
-    return null;  // No available slots
-};
+
 
 // ✅ Render login page
 app.get("/", (req, res) => {
@@ -47,24 +38,6 @@ app.get("/", (req, res) => {
         }
     });
 });
-
-// // Verify user & assign role
-// app.post("/verify", (req, res) => {
-//     if (playerCount >= 2) {
-//         return res.send("<h2>Room is full. Try again later.</h2> <a href='/'>Go Back</a>");
-//     }
-
-//     let assignedRole = assignPlayerRole(req.session);
-
-//     if (assignedRole) {
-//         req.session.role = assignedRole;
-//         req.session.isAuthenticated = true;
-//         // playerCount++;
-//         // res.redirect("/main");
-//     } else {
-//         res.send("<h2>No ROLE Assigned </h2> <a href='/'>Go Back</a>");
-//     }
-// });
 
 const requireAuth = (req, res, next) => {
     if (req.session.isAuthenticated) {
@@ -86,28 +59,70 @@ app.get("/main", requireAuth, (req, res) => {
     });
 });
 
+const assignPlayerRole = (session) => {
+    if (!players["player1"]) {
+        players["player1"] = session.id;
+        return "player1";
+    } else if (!players["player2"]) {
+        players["player2"] = session.id;
+        return "player2";
+    }
+    return null;  // No available slots
+};
+
 
 io.on("connection", (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+    console.log(`Client connected: ${socket.id} playerCount: ${playerCount}`);
 
-    // Register the user and assign them a role
-    socket.on("joinRoom", (data) => {
-        if (playerCount < 2){
+    socket.on("register", (data) => {
             let udata = JSON.parse(data);
             if (udata.roomID == roomID){
                 const assignedRole = assignPlayerRole(socket);
-                console.log("Player Verified");
                 socket.emit("roleAssigned", { role: assignedRole, roomID });
-                playerCount++;
-                socket.join(roomID);
-                console.log(`${assignedRole} joined room: ${roomID}`);
-                io.to(roomID).emit("chatMessage", {
-                    user: assignedRole,
-                    message: `${assignedRole} has joined the room!`
-                });
+                console.log("Player Verified");
             } 
-        }
     });
+
+    socket.on("sync", (data) =>{
+        players[data] = socket.id;
+        console.log("Synchronization Done!!")
+        console.log(players);
+    })
+
+    socket.on("joinRoom",(data) =>{
+        let udata = JSON.parse(data);
+        if (udata.uname == "NOPE"){
+            console.log("Clearing")
+            socket.emit("clearSession");
+            for (let role in players) {
+                if (players[role] === socket.id) {
+                    delete players[role];
+                    playerCount--;
+                    break;
+                }
+            }
+        }
+        if (playerCount < 2){
+            socket.join(udata.roomID); 
+            playerCount++;
+            console.log(`${udata.role} joined room: ${udata.roomID}`);
+            io.emit("chatMessage", {
+                user: udata.roomID,
+                message: `${udata.role} has joined the room!`,
+                role: udata.role
+            });
+        } else {
+            io.emit("chatMessage",{
+                user: "Server",
+                message: "Room is FULL!!!!",
+            });
+        }
+
+        // io.to(roomID).emit("chatMessage", {
+        //     user: assignedRole,
+        //     message: `${assignedRole} has joined the room!`
+        // });
+    })
 
     socket.on("chatMessage", (data) => {
         console.log(`[${data.role}] ${data.user}: ${data.message}`);
@@ -115,7 +130,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        console.log(`Client disconnected: ${socket.id}`);
+        console.log(`Client disconnected: ${socket.id}  playerCount: ${playerCount}`);
 
         // Remove player role on disconnect
         for (let role in players) {
