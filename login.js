@@ -1,19 +1,24 @@
 const button = document.querySelector('button');
 const socket = io();
-let roleAssigneD = false
-let roomJoined = false
 
-// Listen for the server's role assignment message
 socket.on("roleAssigned", (data) => {
     console.log(`Your Role: ${data.role}`);
     localStorage.clear();
     localStorage.setItem("role", data.role);
-    roleAssigneD = true;
+    localStorage.setItem("name", document.querySelector("#name").value);
 });
 
-// Listen for incoming chat messages
+socket.on("redirectToMain", () => {
+    window.location.href = "/main";
+})
+
+socket.on("logoutUser",() => {
+    localStorage.clear();
+    window.location.href = "/"
+});
+
 socket.on("chatMessage", (data) => {
-    console.log(`[${data.role}] ${data.user}: ${data.message}`);
+    console.log(`[${data.role}] : ${data.msg}`);
 });
 
 socket.on("clearSession",()=>{
@@ -34,16 +39,12 @@ function sendMessage() {
 
     let sData = JSON.stringify(udata);
     if(storedRole){
-        if (storedRole === null){
-            console.log("NOPE")
-            localStorage.clear();
-            socket.emit("register",sData);
-        } else { 
-            socket.emit("sync",udata.role);
-            socket.emit("joinRoom",sData);
-        }
+        localStorage.clear();
+        socket.emit("register",sData);
+        socket.emit("joinRoom",sData);
     } else {
         socket.emit("register",sData);
+        socket.emit("joinRoom",sData);
     }
 
 }

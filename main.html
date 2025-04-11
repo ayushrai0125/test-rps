@@ -10,18 +10,20 @@
 
 <body>
   <container>
-    <span><h2 id = "player1Score"></h2></span><span><h2 id = "player2Score"></h2></span>
+    <h1>Round : </h1>
+    <br>
+    <span><h2 id = "p1Score">Player1:0</h2></span><span><h2 id = "p2Score">Player2:0</h2></span>
     <br>
     <div>
-      <button id = "r" class="nope">Rock</button>
-      <button id = "p" class="nope">Paper</button>
-      <button id = "s" class="nope">Scissors</button>
-    </div><br><span>You chose: </span><span id = "player"></span>
+      <button id = "Rock" class="nope">Rock</button>
+      <button id = "Paper" class="nope">Paper</button>
+      <button id = "Scissors" class="nope">Scissors</button>
+    </div><br><span>You chose: </span><span id = "playerChoice"></span>
     <br>
     <br>
     <br>
     <div>
-      <span>Other Person chose: </span><span id = "other"></span>
+      <span>Other Person chose: </span><span id = "otherChoice"></span>
       <div>
         <h1>Result: </h1>
         <h1 id = "result"></h1>
@@ -30,7 +32,11 @@
     <br>
     <br>
     <button id = "ready">Ready!!</button>
+    <br>
+    <br>
+    <h2 id="readyStatus">You : Not Ready | Other Player : Not Ready</h2>
   </container>
+  <h1 id="mainRes"></h1>
 </body>
 <script src="main.js"></script>
 </html>
